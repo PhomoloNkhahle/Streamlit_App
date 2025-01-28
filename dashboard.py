@@ -1,67 +1,74 @@
 import pandas as pd
-import numpy as np
-import streamlit as st
-import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import LabelEncoder
-data = pd.read_csv('Cleaned_combined_data.csv', encoding='utf-8')
-st.title("Interactive Data Dashboard")
-st.write("This app visualizes key insights from the dataset.")
-# Convert categorical columns to numeric while preserving original labels for visualization
-categorical_cols = data.select_dtypes(include=['object']).columns
-label_encoders = {}
+import seaborn as sns
+import streamlit as st
 
-for col in categorical_cols:
-    if col not in ['Name', 'Parents Name', 'Parental Involvement Insights']:
-        le = LabelEncoder()
-        data[f"{col}_encoded"] = le.fit_transform(data[col].astype(str))
-        label_encoders[col] = le
+# Load the dataset
+data = pd.read_csv('Cleaned_updated_combined_data.csv')
 
-# Show summary statistics
-st.header("Summary Statistics")
+# Streamlit Markdown for Insights
+st.title('Student Performance Dashboard')
+
+st.markdown("""## Insights
+
+This dashboard provides key insights into students' academic performance, parental involvement, and lifestyle factors. Use the interactive elements to explore the data in detail.
+
+### Key Findings:
+- **Performance Trends:** Analyze how parental education, test preparation, and sleep patterns influence academic performance.
+- **Lifestyle Factors:** Examine the impact of social media and food habits on performance.
+- **Correlations:** Identify relationships between different variables, such as normalized scores and overall performance.
+
+""")
+
+# Summary Statistics
+st.subheader('Summary Statistics')
 st.write(data.describe())
 
-# Correlation matrix
-st.header("Correlation Heatmap")
-corr_matrix = data.select_dtypes(include=[np.number]).corr()
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
-st.pyplot(fig)
-
-# Visualizations
-st.header("Visualizations")
-
 # Distribution of Overall Performance
-st.subheader("Distribution of Overall Performance")
-fig, ax = plt.subplots()
-sns.histplot(data["Overall Performance"], kde=True, ax=ax, color='blue')
-st.pyplot(fig)
+st.subheader('Distribution of Overall Performance')
+fig1, ax1 = plt.subplots()
+sns.histplot(data['Overall Performance'], bins=20, kde=True, color='blue', ax=ax1)
+ax1.set_title('Distribution of Overall Performance')
+st.pyplot(fig1)
 
-# Performance by Parent Education Level
-st.subheader("Performance by Parent Education Level")
-fig, ax = plt.subplots()
-sns.boxplot(x="Parent Education Level", y="Overall Performance", data=data, ax=ax)
-st.pyplot(fig)
+# Boxplot of Performance by Parent Education Level
+st.subheader('Performance by Parent Education Level')
+fig2, ax2 = plt.subplots()
+sns.boxplot(x='Parent Education Level', y='Overall Performance', data=data, ax=ax2)
+ax2.set_title('Overall Performance vs. Parent Education Level')
+ax2.set_xlabel('Parent Education Level')
+ax2.set_ylabel('Overall Performance')
+st.pyplot(fig2)
 
-# Scatter plot for normalized scores
-st.subheader("Scatter Plot: Normalized Maths vs Normalized Reading")
-fig, ax = plt.subplots()
-sns.scatterplot(x="Normalized Maths", y="Normalized Reading", hue="Performance Category", data=data, ax=ax)
-st.pyplot(fig)
+# Correlation Heatmap
+st.subheader('Correlation Heatmap')
+fig3, ax3 = plt.subplots(figsize=(10, 8))
+correlation = data.corr()
+sns.heatmap(correlation, annot=True, cmap='coolwarm', fmt='.2f', ax=ax3)
+ax3.set_title('Correlation Heatmap')
+st.pyplot(fig3)
 
-# Interactive filters
-st.sidebar.header("Filters")
-selected_gender = st.sidebar.selectbox("Gender", options=data["Gender"].dropna().unique())
-filtered_data = data[data["Gender"] == selected_gender]
+# Scatterplot: Normalized Maths vs. Normalized Reading
+st.subheader('Normalized Maths vs. Normalized Reading')
+fig4, ax4 = plt.subplots()
+sns.scatterplot(x='Normalized Maths', y='Normalized Reading', hue='Performance Category', data=data, palette='viridis', ax=ax4)
+ax4.set_title('Normalized Maths vs. Normalized Reading')
+ax4.set_xlabel('Normalized Maths')
+ax4.set_ylabel('Normalized Reading')
+st.pyplot(fig4)
 
-st.subheader("Filtered Data")
-st.write(filtered_data)
+# Bar Chart: Sleep Category Distribution
+st.subheader('Sleep Category Distribution')
+fig5, ax5 = plt.subplots()
+data['Sleep Category'].value_counts().plot(kind='bar', color='green', ax=ax5)
+ax5.set_title('Sleep Category Distribution')
+ax5.set_xlabel('Sleep Category')
+ax5.set_ylabel('Count')
+st.pyplot(fig5)
 
-# Insights
-st.header("Key Insights")
-st.write("""
-- **Correlation Analysis:** There is a strong positive correlation between normalized math, reading, and writing scores.
-- **Parental Education:** Higher parental education levels are generally associated with better overall performance.
-- **Sleep Impact:** Students with optimal sleep tend to perform better than those with insufficient sleep.
-- **Social Media:** Excessive social media use negatively impacts performance.
+# Markdown for Additional Insights
+st.markdown("""### Additional Insights
+- **Correlation Heatmap:** Reveals strong positive/negative relationships between variables, aiding in understanding key performance drivers.
+- **Parental Education Impact:** Boxplot analysis shows higher parental education is often associated with improved performance.
+- **Sleep Patterns:** Bar chart highlights the distribution of sleep categories, reflecting lifestyle differences.
 """)
