@@ -4,7 +4,7 @@ import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder
-data = pd.read_csv('Cleaned_combined_data.csv')
+data = pd.read_csv('Cleaned_combined_data.csv', encoding='utf-8')
 st.title("Interactive Data Dashboard")
 st.write("This app visualizes key insights from the dataset.")
 # Convert categorical columns to numeric while preserving original labels for visualization
